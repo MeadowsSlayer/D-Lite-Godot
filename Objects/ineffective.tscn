@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://pprelxtphes2"]
+
+[node name="Ineffective" type="Polygon2D"]
+position = Vector2(32, 48)
+color = Color(0.941176, 0.027451, 0.00784314, 1)
+polygon = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
