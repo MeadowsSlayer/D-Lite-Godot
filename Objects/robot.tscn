@@ -1,14 +1,14 @@
 [gd_scene load_steps=4 format=3 uid="uid://fxe83umffj1m"]
 
-[ext_resource type="Script" path="res://Objects/robot.gd" id="1_30v25"]
 [ext_resource type="SpriteFrames" uid="uid://c4dja0ich07s8" path="res://Sprites/Robot.tres" id="1_blqys"]
+[ext_resource type="Script" path="res://Objects/robot_ver2.gd" id="1_tyflt"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xhdh0"]
 size = Vector2(10, 10)
 
 [node name="Robot" type="StaticBody2D"]
 position = Vector2(32, -48)
-script = ExtResource("1_30v25")
+script = ExtResource("1_tyflt")
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
 polygon = PackedVector2Array(0, -16, -32, 16, 32, 16)
@@ -19,12 +19,8 @@ sprite_frames = ExtResource("1_blqys")
 animation = &"up"
 
 [node name="RayCast2D" type="RayCast2D" parent="."]
-target_position = Vector2(0, 32)
-
-[node name="Polygon2D" type="Polygon2D" parent="."]
 visible = false
-color = Color(0.321569, 0.584314, 0.388235, 0.239216)
-polygon = PackedVector2Array(0, -128, 128, -64, 128, 64, 0, 128, -128, 64, -128, -64, -136, -64, -136, 64, -136, 64, -136, 72, 0, 136, 136, 72, 136, -72, 0, -136, -136, -72, -136, -64, -128, -64)
+target_position = Vector2(32, 0)
 
 [node name="Down" type="Area2D" parent="."]
 position = Vector2(0, 32)
@@ -32,8 +28,35 @@ position = Vector2(0, 32)
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Down"]
 shape = SubResource("RectangleShape2D_xhdh0")
 
+[node name="Right" type="Area2D" parent="."]
+position = Vector2(32, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Right"]
+shape = SubResource("RectangleShape2D_xhdh0")
+
+[node name="Left" type="Area2D" parent="."]
+position = Vector2(-32, 0)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Left"]
+shape = SubResource("RectangleShape2D_xhdh0")
+
 [node name="Up" type="Area2D" parent="."]
 position = Vector2(0, -32)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Up"]
 shape = SubResource("RectangleShape2D_xhdh0")
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+position = Vector2(0, -8)
+color = Color(0.289063, 0.886719, 0.984375, 1)
+polygon = PackedVector2Array(-16, 0, -8, 0, -8, 8, -16, 8)
+
+[node name="Polygon2D2" type="Polygon2D" parent="."]
+position = Vector2(24, -8)
+color = Color(0.290196, 0.890196, 0.988235, 1)
+polygon = PackedVector2Array(-16, 0, -8, 0, -8, 8, -16, 8)
+
+[node name="Polygon2D3" type="Polygon2D" parent="."]
+position = Vector2(0, -8)
+color = Color(0.0941176, 0.427451, 0.262745, 1)
+polygon = PackedVector2Array(-8, 8, 8, 8, 8, 16, -8, 16)

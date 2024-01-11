@@ -3,6 +3,13 @@ extends StaticBody2D
 @onready var ray = $RayCast2D
 @onready var down = $Down
 @onready var up = $Up
+@onready var dir_boxes = {
+	"right": $Right,
+	"left": $Left,
+	"down": $Down,
+	"up": $Up,
+	
+}
 
 @export var goal : Marker2D
 @export var line : Line2D

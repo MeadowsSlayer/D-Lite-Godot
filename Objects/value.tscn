@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3 uid="uid://di4efilexbhoq"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_1bjuk"]
+font_size = 12
+
+[node name="Value" type="Label"]
+offset_left = -32.0
+offset_top = -16.0
+offset_right = 32.0
+offset_bottom = 16.0
+pivot_offset = Vector2(32, 16)
+label_settings = SubResource("LabelSettings_1bjuk")
+horizontal_alignment = 1
+vertical_alignment = 1
