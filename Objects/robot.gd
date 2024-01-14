@@ -3,226 +3,229 @@ extends StaticBody2D
 @onready var ray = $RayCast2D
 @onready var down = $Down
 @onready var up = $Up
+@onready var right = $Right
+@onready var left = $Left
 @onready var dir_boxes = {
-	"right": $Right,
-	"left": $Left,
-	"down": $Down,
-	"up": $Up,
-	
+	"right": right,
+	"left": left,
+	"down": down,
+	"up": up
 }
 
 @export var goal : Marker2D
 @export var line : Line2D
+@export var line_path : Line2D
 
-var goal_position
+var goal_pos
 var del_x
 var del_y
-var initial_position
+var initial_pos
 var initial_scale
-var vertical_perm
-var horizontal_perm
-var path = 0
+var limit_x = [32, 1120]
+var limit_y = [16, 624]
+var limit_x_traversed = [1900, 0]
+var limit_y_traversed = [1900, 0]
+var path = []
 var points_traversed = []
-var points_inneffective = []
+var points_avoid = []
+var possible_dir = []
+var graph = {}
 var move_directions = {
 	"right": Vector2(32, 0),
 	"left": Vector2(-32, 0),
 	"up": Vector2(0, -32),
 	"down": Vector2(0, 32)}
-var ineffective_mark = preload("res://Objects/ineffective.tscn")
+var value_label = preload("res://Objects/value.tscn")
 
 func _ready():
-	goal_position = goal.get_global_transform().get_origin()
-	initial_position = position
+	initial_pos = position
 	initial_scale = scale
+	goal_pos = goal.get_global_transform().get_origin()
 	line.add_point(position)
 	points_traversed.append(position)
-	points_traversed.append(position)
+	init_graph()
 
 func _physics_process(_delta):
-	if position != goal_position:
-		check_shorter_route()
-		calculate_direction()
-
-func _unhandled_input(event):
-	if event.is_action_pressed("move"):
-		if position != goal_position:
-			check_shorter_route()
-			calculate_direction()
-
-func calculate_direction():
-	var dir
-	vertical_perm = check_next_position("up") or check_next_position("down")
-	horizontal_perm = check_next_position("left") or check_next_position("right")
-	del_x = goal_position.x - position.x
-	del_y = goal_position.y - position.y
-	
-	if abs(del_x) >= abs(del_y) and del_x != 0:
-		if horizontal_perm:
-			dir = move_horizontal(false)
-		elif vertical_perm:
-			dir = move_vertical(false)
-		else:
-			clear_points_ineffective()
-	elif abs(del_y) > abs(del_x) and del_y != 0:
-		if vertical_perm:
-			dir = move_vertical(false)
-		elif horizontal_perm:
-			dir = move_horizontal(false)
-		else:
-			clear_points_ineffective()
-	
-	if lenght_of_path_in_direction()[1] > 1:
-		var max_dir = lenght_of_path_in_direction()[0]
-		if max_dir != dir or dir == null:
-			if (dir == "right" and del_x < 0) or (dir == "left" and del_x > 0) or (dir == "up" and del_y > 0) or (dir == "down" and del_y < 0):
-				dir = lenght_of_path_in_direction()[0]
-			if (del_x < 0 and max_dir == "left") or (del_x > 0 and max_dir == "right") or (del_y < 0 and max_dir == "up") or (del_y > 0 and max_dir == "down"):
-				dir = lenght_of_path_in_direction()[0]
-	
-	if dir != null:
-		move(dir)
-	else:
-		step_back()
-
-func move_horizontal(repeat):
-	if del_x > 0:
-		if check_next_position("right"):
-			return "right"
-		else:
-			if vertical_perm and !repeat:
-				return move_vertical(true)
-			else:
-				return "left"
-	else:
-		if check_next_position("left"):
-			return "left"
-		else:
-			if vertical_perm and !repeat:
-				return move_vertical(true)
-			else:
-				return "right"
-
-func move_vertical(repeat):
-	if del_y < 0:
-		if check_next_position("up"):
-			return "up"
-		else:
-			if horizontal_perm and !repeat:
-				return move_horizontal(true)
-			else:
-				return "down"
-	else:
-		if check_next_position("down"):
-			return "down"
-		else:
-			if horizontal_perm and !repeat:
-				return move_horizontal(true)
-			else:
-				return "up"
-
-func mark_point_ineffective(pos):
-	if pos not in points_traversed or pos == position:
-		var mark = ineffective_mark.instantiate()
-		mark.position = pos
-		$"../Marks".add_child(mark)
-		points_inneffective.append(pos)
-
-func clear_points_ineffective():
-	for dir in move_directions.keys():
-		points_inneffective.erase(position + move_directions[dir])
-	for i in $"../Marks".get_children():
-		i.queue_free()
-	for i in points_inneffective:
-		if i not in points_traversed or i == position:
-			var mark = ineffective_mark.instantiate()
-			mark.position = i
-			$"../Marks".add_child(mark)
-
-func step_back():
-	mark_point_ineffective(position)
-	mark_point_ineffective(points_traversed[points_traversed.size() - 1])
-	line.remove_point(len(line.points)-1)
-	scale.y *= -1
-	position = points_traversed[points_traversed.size() - 2]
-	points_traversed.remove_at(points_traversed.size() - 1)
-	path -= 1
-
-func check_next_position(dir):
-	ray.target_position = move_directions[dir]
-	ray.target_position.y *= scale.y
-	ray.force_raycast_update()
-	if (position + move_directions[dir]) not in points_traversed and (position + move_directions[dir]) not in points_inneffective and (!ray.is_colliding() or ((dir == "down" and ((scale.y == 1 and !down.has_overlapping_bodies()) or (scale.y == -1 and !up.has_overlapping_bodies()))) or (dir == "up" and ((scale.y == -1 and !down.has_overlapping_bodies()) or (scale.y == 1 and !up.has_overlapping_bodies()))))):
-		return true
-	else:
-		mark_point_ineffective(position + move_directions[dir])
-		return false
-
-func lenght_of_path_in_direction():
-	var can_pass = true
-	var value = 0
-	var direction
-	var max_val = 0
-	for dir in move_directions.keys():
-		value = 0
-		can_pass = true
-		ray.target_position = move_directions[dir]
-		ray.target_position.y *= scale.y
-		ray.force_raycast_update()
-		while can_pass:
-			if value != 0:
-				ray.target_position += move_directions[dir]
-			ray.force_raycast_update()
-			if (position + move_directions[dir]) not in points_traversed and (position + move_directions[dir]) not in points_inneffective and !ray.is_colliding():
-				can_pass = true
-				value += 1
-			else:
-				can_pass = false
+	if position != goal_pos:
+		if scan_for_obstacles() or path == []:
+			update_tiles()
+			path = []
+			compute_shortest_path()
 		
-		if value > max_val:
-			max_val = value
-			direction = dir
-	
-	return [direction, max_val]
+		if path != []:
+			move()
 
-func check_possible_position(dir):
-	ray.target_position = move_directions[dir]
-	ray.target_position.y *= scale.y
-	ray.force_raycast_update()
-	if position + move_directions[dir] != points_traversed[points_traversed.size() - 2] and (!ray.is_colliding() or ((dir == "down" and ((scale.y == 1 and !down.has_overlapping_bodies()) or (scale.y == -1 and !up.has_overlapping_bodies()))) or (dir == "up" and ((scale.y == -1 and !down.has_overlapping_bodies()) or (scale.y == 1 and !up.has_overlapping_bodies()))))):
-		return true
+func compute_shortest_path():
+	var min_path = float(INF)
+	var next_point
+	var point
+	path = []
+	for i in possible_dir:
+		if graph[i] < min_path:
+			min_path = graph[i]
+			next_point = i
+	
+	if min_path == float(INF) or next_point == null or next_point in points_traversed:
+		points_avoid.append(position)
+		clear_path()
 	else:
-		return false
+		path.append(next_point)
+		var prev_point
+		
+		while path[path.size() - 1] != goal_pos:
+			min_path = float(INF)
+			prev_point = next_point
+			for dir in move_directions.keys():
+				point = path[path.size() - 1] + move_directions[dir]
+				if graph.has(point) and graph[point] != float(INF) and graph[point] < min_path and point not in path and point not in points_traversed and point not in points_avoid:
+					min_path = graph[point]
+					next_point = point
+			
+			
+			if min_path == float(INF) or prev_point == next_point:
+				points_avoid.append(next_point)
+				path = [path[0]]
+				if possible_dir.size() > 1:
+					possible_dir.erase(path[0])
+					path = [possible_dir[0]]
+				else:
+					if position != initial_pos:
+						position = points_traversed[points_traversed.size() - 1]
+						points_traversed.remove_at(points_traversed.size() - 1)
+						path = [position]
+			else:
+				path.append(next_point)
 
-func check_shorter_route():
-	for dir in move_directions.keys():
-		if check_possible_position(dir) and position + move_directions[dir] in points_traversed:
-			move_to_shorter_route(position + move_directions[dir])
-	
-	for i in points_traversed:
-		if position.y == i.y:
-			pass
-
-func move_to_shorter_route(pos):
-	var temp_arr
-	var point_id
-	points_traversed.remove_at(points_traversed.size() - 1)
-	point_id = points_traversed.find(pos, 0)
-	if point_id == -1:
-		point_id = points_traversed.size() - 1
-	temp_arr = points_traversed.slice(point_id + 1)
-	points_traversed = points_traversed.slice(0, point_id + 1)
-	line.points = points_traversed
-	position = pos
-	if temp_arr.size() % 2 == 0:
-		scale.y *= -1
-	print(temp_arr)
-	for i in temp_arr.slice(1):
-		mark_point_ineffective(i)
-
-func move(dir):
+func move():
 	scale.y *= -1
-	position += move_directions[dir]
-	path += 1
+	position = path[0]
+	line_path.points = path
+	path.remove_at(0)
 	points_traversed.append(position)
+	line.points = points_traversed
+	if position.x > limit_x_traversed[1]:
+		limit_x_traversed[1] = position.x
+	if position.x < limit_x_traversed[0]:
+		limit_x_traversed[0] = position.x
+	
+	if position.y > limit_y_traversed[1]:
+		limit_y_traversed[1] = position.y
+	if position.y < limit_y_traversed[0]:
+		limit_y_traversed[0] = position.y
+
+func clear_path():
+	path = []
+	points_traversed = []
+	points_traversed.append(initial_pos)
+	position = initial_pos
+	scale = initial_scale
+	line.clear_points()
 	line.add_point(position)
+
+func init_graph():
+	var point_x = limit_x[0]
+	var point_y = limit_y[0]
+	while point_y <= limit_y[1]:
+		del_y = abs(goal_pos.y - point_y) / 32
+		while point_x <= limit_x[1]:
+			del_x = abs(goal_pos.x - point_x) / 32
+			graph[Vector2(point_x, point_y)] = (del_x + del_y)
+			mark_tiles(Vector2(point_x, point_y))
+			point_x += 32
+		point_x = limit_x[0]
+		point_y += 32
+
+func mark_tiles(pos):
+	var point_value = value_label.instantiate()
+	point_value.position = pos
+	point_value.text = str(graph[pos])
+	$"../TileValues".add_child(point_value)
+
+func update_tiles():
+	for i in $"../TileValues".get_children():
+		i.queue_free()
+	for i in graph.keys():
+		mark_tiles(i)
+
+func scan_for_obstacles():
+	var next_pos
+	var updated = false
+	possible_dir = []
+	for dir in move_directions.keys():
+		var scale_dir = dir
+		next_pos = position + move_directions[dir]
+		if dir == "down" and scale.y == -1:
+			scale_dir = "up"
+		if dir == "up" and scale.y == -1:
+			scale_dir = "down"
+		
+		if dir_boxes[scale_dir].has_overlapping_bodies() and graph.has(next_pos) and graph[next_pos] != float(INF):
+			graph[next_pos] = float(INF)
+			updated = true
+		elif next_pos not in points_traversed and next_pos not in points_avoid and graph.has(next_pos) and !dir_boxes[scale_dir].has_overlapping_bodies():
+			possible_dir.append(position + move_directions[dir])
+	
+	if possible_dir.size() != 0:
+		if scan_possible_dir():
+			updated = true
+	
+	return updated
+
+func scan_possible_dir():
+	var no_min = true
+	var temp_arr = []
+	var point
+	for i in possible_dir:
+		temp_arr.append(graph[i])
+		if graph[position] > graph[i] and graph[position] - graph[i] == 1:
+			no_min = false
+	
+	if no_min:
+		point = possible_dir[temp_arr.find(temp_arr.min())]
+		if position.x - point.x != 0:
+			if goal_pos.y - position.y > 0:
+				change_value_triangle(point, "up")
+			else:
+				change_value_triangle(point, "down")
+		elif position.y - point.y != 0:
+			if goal_pos.x - position.x > 0:
+				change_value_triangle(point, "left")
+			else:
+				change_value_triangle(point, "right")
+	
+	return no_min
+
+func change_value_triangle(point, direction):
+	var diff = graph[point] + 1 - graph[position]
+	if direction == "left" or direction == "right":
+		var point_x
+		if direction == "left":
+			point_x = limit_x_traversed[1]
+		if direction == "right":
+			point_x = limit_x_traversed[0]
+		while point_x >= limit_x[0] and point_x <= limit_x[1]:
+			var point_y = limit_y[0]
+			while point_y >= limit_y[0] and point_y <= limit_y[1]:
+				if Vector2(point_x, point_y) != point:
+					graph[Vector2(point_x, point_y)] += diff
+				point_y += 32
+			if direction == "left":
+				point_x -= 32
+			elif direction == "right":
+				point_x += 32
+	elif direction == "down" or direction == "up":
+		var point_y
+		if direction == "down":
+			point_y = limit_y_traversed[0]
+		if direction == "up":
+			point_y = limit_y_traversed[1]
+		while point_y >= limit_y[0] and point_y <= limit_y[1]:
+			var point_x = limit_x[0]
+			while point_x >= limit_x[0] and point_x <= limit_x[1]:
+				if Vector2(point_x, point_y) != point:
+					graph[Vector2(point_x, point_y)] += diff
+				point_x += 32
+			if direction == "up":
+				point_y -= 32
+			elif direction == "down":
+				point_y += 32

@@ -14,6 +14,7 @@ extends StaticBody2D
 
 @export var goal : Marker2D
 @export var line : Line2D
+@export var line_path : Line2D
 
 var goal_pos
 var del_x
@@ -22,6 +23,8 @@ var initial_pos
 var initial_scale
 var limit_x = [32, 1120]
 var limit_y = [16, 624]
+var limit_x_traversed = [1900, 0]
+var limit_y_traversed = [1900, 0]
 var path = []
 var points_traversed = []
 var points_avoid = []
@@ -35,12 +38,18 @@ var move_directions = {
 var value_label = preload("res://Objects/value.tscn")
 
 func _ready():
+	set_physics_process(false)
+
+func start():
 	initial_pos = position
 	initial_scale = scale
 	goal_pos = goal.get_global_transform().get_origin()
 	line.add_point(position)
 	points_traversed.append(position)
 	init_graph()
+	scan_for_obstacles()
+	update_tiles()
+	set_physics_process(true)
 
 func _physics_process(_delta):
 	if position != goal_pos:
@@ -51,6 +60,10 @@ func _physics_process(_delta):
 		
 		if path != []:
 			move()
+	else:
+		normalize_grid()
+		update_tiles()
+		set_physics_process(false)
 
 func compute_shortest_path():
 	var min_path = float(INF)
@@ -96,9 +109,19 @@ func compute_shortest_path():
 func move():
 	scale.y *= -1
 	position = path[0]
+	line_path.points = path
 	path.remove_at(0)
 	points_traversed.append(position)
-	line.add_point(position)
+	line.points = points_traversed
+	if position.x > limit_x_traversed[1]:
+		limit_x_traversed[1] = position.x
+	if position.x < limit_x_traversed[0]:
+		limit_x_traversed[0] = position.x
+	
+	if position.y > limit_y_traversed[1]:
+		limit_y_traversed[1] = position.y
+	if position.y < limit_y_traversed[0]:
+		limit_y_traversed[0] = position.y
 
 func clear_path():
 	path = []
@@ -149,27 +172,41 @@ func scan_for_obstacles():
 		if dir_boxes[scale_dir].has_overlapping_bodies() and graph.has(next_pos) and graph[next_pos] != float(INF):
 			graph[next_pos] = float(INF)
 			updated = true
-		elif next_pos not in points_traversed and graph.has(next_pos) and !dir_boxes[scale_dir].has_overlapping_bodies():
+		elif next_pos not in points_traversed and next_pos not in points_avoid and graph.has(next_pos) and !dir_boxes[scale_dir].has_overlapping_bodies():
 			possible_dir.append(position + move_directions[dir])
 	
-	if updated and possible_dir.size() != 0:
-		scan_possible_dir()
+	if possible_dir.size() != 0:
+		if scan_possible_dir():
+			updated = true
 	
 	return updated
 
 func scan_possible_dir():
 	var no_min = true
 	var temp_arr = []
-	var hor_dir = true
-	var ver_dir = true
 	var point
+	var updated = false
 	for i in possible_dir:
 		temp_arr.append(graph[i])
 		if graph[position] > graph[i]:
 			no_min = false
 	
+	point = possible_dir[temp_arr.find(temp_arr.min())]
+	
+	if !no_min and graph[position] - graph[point] != 1:
+		if position.x - point.x != 0:
+			if position.x - point.x < 0:
+				change_value_triangle_reverse(point, "right")
+			else:
+				change_value_triangle_reverse(point, "left")
+		elif position.y - point.y != 0:
+			if position.y - point.y < 0:
+				change_value_triangle_reverse(point, "down")
+			else:
+				change_value_triangle_reverse(point, "up")
+		updated = true
+	
 	if no_min:
-		point = possible_dir[temp_arr.find(temp_arr.min())]
 		if position.x - point.x != 0:
 			if goal_pos.y - position.y > 0:
 				change_value_triangle(point, "up")
@@ -180,40 +217,82 @@ func scan_possible_dir():
 				change_value_triangle(point, "left")
 			else:
 				change_value_triangle(point, "right")
+		updated = true
 	
-	
-	
+	return updated
+
 func change_value_triangle(point, direction):
 	var diff = graph[point] + 1 - graph[position]
+	var reverse = false
+	if graph[point] < graph[position]:
+		reverse = true
+		diff *= -1
+	
 	if direction == "left" or direction == "right":
-		var point_x = position.x
-		var limit_y_pos = [position.y, position.y]
+		var point_x
+		if direction == "left":
+			point_x = limit_x_traversed[1]
+		if direction == "right":
+			point_x = limit_x_traversed[0]
 		while point_x >= limit_x[0] and point_x <= limit_x[1]:
-			var point_y = limit_y_pos[0]
-			while point_y >= limit_y_pos[0] and point_y <= limit_y_pos[1]:
+			var point_y = limit_y[0]
+			while point_y >= limit_y[0] and point_y <= limit_y[1]:
+				if Vector2(point_x, point_y) != point or reverse:
+					graph[Vector2(point_x, point_y)] += diff
+				point_y += 32
+			if direction == "left":
+				point_x -= 32
+			elif direction == "right":
+				point_x += 32
+	elif direction == "down" or direction == "up":
+		var point_y
+		if direction == "down":
+			point_y = limit_y_traversed[0]
+		if direction == "up":
+			point_y = limit_y_traversed[1]
+		while point_y >= limit_y[0] and point_y <= limit_y[1]:
+			var point_x = limit_x[0]
+			while point_x >= limit_x[0] and point_x <= limit_x[1]:
+				if Vector2(point_x, point_y) != point or reverse:
+					graph[Vector2(point_x, point_y)] += diff
+				point_x += 32
+			if direction == "up":
+				point_y -= 32
+			elif direction == "down":
+				point_y += 32
+
+func change_value_triangle_reverse(point, direction):
+	var diff = graph[position] - 1 - graph[point]
+	
+	if direction == "left" or direction == "right":
+		var point_x = point.x
+		while point_x >= limit_x[0] and point_x <= limit_x[1]:
+			var point_y = limit_y[0]
+			while point_y >= limit_y[0] and point_y <= limit_y[1]:
 				graph[Vector2(point_x, point_y)] += diff
 				point_y += 32
 			if direction == "left":
 				point_x -= 32
 			elif direction == "right":
 				point_x += 32
-			if limit_y_pos[0] - 32 >= limit_y[0] and limit_y_pos[0] - 32 <= limit_y[1]:
-				limit_y_pos[0] -= 32
-			if limit_y_pos[1] + 32 >= limit_y[0] and limit_y_pos[1] + 32 <= limit_y[1]:
-				limit_y_pos[1] += 32
 	elif direction == "down" or direction == "up":
-		var point_y = position.y
-		var limit_x_pos = [position.x, position.x]
+		var point_y = point.y
 		while point_y >= limit_y[0] and point_y <= limit_y[1]:
-			var point_x = limit_x_pos[0]
-			while point_x >= limit_x_pos[0] and point_x <= limit_x_pos[1]:
+			var point_x = limit_x[0]
+			while point_x >= limit_x[0] and point_x <= limit_x[1]:
 				graph[Vector2(point_x, point_y)] += diff
 				point_x += 32
 			if direction == "up":
 				point_y -= 32
 			elif direction == "down":
 				point_y += 32
-			if limit_x_pos[0] - 32 >= limit_x[0] and limit_x_pos[0] - 32 <= limit_x[1]:
-				limit_x_pos[0] -= 32
-			if limit_x_pos[1] + 32 >= limit_x[0] and limit_x_pos[1] + 32 <= limit_x[1]:
-				limit_x_pos[1] += 32
+
+func normalize_grid():
+	var diff = graph[goal_pos]
+	var point_x = limit_x[0]
+	while point_x >= limit_x[0] and point_x <= limit_x[1]:
+		var point_y = limit_y[0]
+		while point_y >= limit_y[0] and point_y <= limit_y[1]:
+			graph[Vector2(point_x, point_y)] -= diff
+			point_y += 32
+		point_x += 32

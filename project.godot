@@ -50,8 +50,7 @@ move={
 
 [physics]
 
-common/physics_ticks_per_second=5
-common/max_physics_steps_per_frame=5
+common/physics_ticks_per_second=8
 
 [rendering]
 
