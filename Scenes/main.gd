@@ -152,8 +152,6 @@ func fill_map():
 			cell_x += 1
 		cell_x = 0
 		cell_y += 1
-	
-	
 
 func possible_tiles(pos):
 	var possible_tiles_arr
@@ -166,13 +164,13 @@ func possible_tiles(pos):
 		top_part = true
 	
 	if top_part and bottom_part:
-		possible_tiles_arr = [Vector2(0, 0)]#, Vector2(1, 1), Vector2(2, 1), Vector2(3, 1)]
+		possible_tiles_arr = [Vector2(0, 0), Vector2(1, 1), Vector2(2, 1), Vector2(3, 1)]
 	elif top_part and !bottom_part:
-		possible_tiles_arr = [Vector2(0, 0), Vector2(2, 0)]#, Vector2(1, 1), Vector2(2, 1), Vector2(3, 1), Vector2(1, 2)]
+		possible_tiles_arr = [Vector2(0, 0), Vector2(2, 0), Vector2(1, 1), Vector2(2, 1), Vector2(3, 1), Vector2(1, 2)]
 	elif !top_part and bottom_part:
-		possible_tiles_arr = [Vector2(0, 0), Vector2(1, 0)]#, Vector2(1, 1), Vector2(2, 1), Vector2(3, 1), Vector2(2, 2)]
+		possible_tiles_arr = [Vector2(0, 0), Vector2(1, 0), Vector2(1, 1), Vector2(2, 1), Vector2(3, 1), Vector2(2, 2)]
 	elif !top_part and !bottom_part:
-		possible_tiles_arr = [Vector2(0, 0), Vector2(1, 0), Vector2(2, 0), Vector2(3, 0)]#, Vector2(1, 1), Vector2(2, 1), Vector2(3, 1), Vector2(1, 2), Vector2(2, 2)]
+		possible_tiles_arr = [Vector2(0, 0), Vector2(1, 0), Vector2(2, 0), Vector2(3, 0), Vector2(1, 1), Vector2(2, 1), Vector2(3, 1), Vector2(1, 2), Vector2(2, 2)]
 	else:
 		possible_tiles_arr = [Vector2(0, 0)]
 	

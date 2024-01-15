@@ -8,6 +8,8 @@ size = Vector2(10, 10)
 
 [node name="Robot" type="StaticBody2D"]
 position = Vector2(32, -48)
+collision_layer = 3
+collision_mask = 3
 script = ExtResource("1_tyflt")
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
@@ -44,6 +46,38 @@ shape = SubResource("RectangleShape2D_xhdh0")
 position = Vector2(0, -32)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Up"]
+shape = SubResource("RectangleShape2D_xhdh0")
+
+[node name="DownDiff" type="Area2D" parent="."]
+position = Vector2(0, 32)
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DownDiff"]
+shape = SubResource("RectangleShape2D_xhdh0")
+
+[node name="RightDiff" type="Area2D" parent="."]
+position = Vector2(32, 0)
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightDiff"]
+shape = SubResource("RectangleShape2D_xhdh0")
+
+[node name="LeftDiff" type="Area2D" parent="."]
+position = Vector2(-32, 0)
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftDiff"]
+shape = SubResource("RectangleShape2D_xhdh0")
+
+[node name="UpDiff" type="Area2D" parent="."]
+position = Vector2(0, -32)
+collision_layer = 2
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="UpDiff"]
 shape = SubResource("RectangleShape2D_xhdh0")
 
 [node name="Polygon2D" type="Polygon2D" parent="."]

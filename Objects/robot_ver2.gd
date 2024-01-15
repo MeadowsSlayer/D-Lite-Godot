@@ -5,11 +5,21 @@ extends StaticBody2D
 @onready var up = $Up
 @onready var right = $Right
 @onready var left = $Left
+@onready var down_diff = $DownDiff
+@onready var right_diff = $RightDiff
+@onready var left_diff = $LeftDiff
+@onready var up_diff = $UpDiff
 @onready var dir_boxes = {
 	"right": right,
 	"left": left,
 	"down": down,
 	"up": up
+}
+@onready var dir_boxes_diff = {
+	"right": right_diff,
+	"left": left_diff,
+	"down": down_diff,
+	"up": up_diff
 }
 
 @export var goal : Marker2D
@@ -27,6 +37,7 @@ var limit_x_traversed = [1900, 0]
 var limit_y_traversed = [1900, 0]
 var path = []
 var points_traversed = []
+var points_changed = []
 var points_avoid = []
 var possible_dir = []
 var graph = {}
@@ -169,9 +180,14 @@ func scan_for_obstacles():
 		if dir == "up" and scale.y == -1:
 			scale_dir = "down"
 		
-		if dir_boxes[scale_dir].has_overlapping_bodies() and graph.has(next_pos) and graph[next_pos] != float(INF):
+		if next_pos not in points_changed and dir_boxes[scale_dir].has_overlapping_bodies() and graph.has(next_pos) and graph[next_pos] != float(INF):
 			graph[next_pos] = float(INF)
 			updated = true
+			points_changed.append(next_pos)
+		if next_pos not in points_changed and dir_boxes_diff[scale_dir].has_overlapping_bodies() and graph.has(next_pos) and graph[next_pos] != float(INF):
+			graph[next_pos] += 2
+			updated = true
+			points_changed.append(next_pos)
 		elif next_pos not in points_traversed and next_pos not in points_avoid and graph.has(next_pos) and !dir_boxes[scale_dir].has_overlapping_bodies():
 			possible_dir.append(position + move_directions[dir])
 	
