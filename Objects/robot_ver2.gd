@@ -185,9 +185,10 @@ func scan_for_obstacles():
 			updated = true
 			points_changed.append(next_pos)
 		if next_pos not in points_changed and dir_boxes_diff[scale_dir].has_overlapping_bodies() and graph.has(next_pos) and graph[next_pos] != float(INF):
-			graph[next_pos] += 2
-			updated = true
-			points_changed.append(next_pos)
+			#graph[next_pos] += 2
+			#updated = true
+			#points_changed.append(next_pos)
+			pass
 		elif next_pos not in points_traversed and next_pos not in points_avoid and graph.has(next_pos) and !dir_boxes[scale_dir].has_overlapping_bodies():
 			possible_dir.append(position + move_directions[dir])
 	

@@ -53,11 +53,6 @@ move={
 2d_physics/layer_1="obstacle"
 2d_physics/layer_2="difficult terrain"
 
-[physics]
-
-common/physics_ticks_per_second=2
-common/max_physics_steps_per_frame=2
-
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0

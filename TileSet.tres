@@ -1,6 +1,16 @@
-[gd_resource type="TileSet" load_steps=3 format=3 uid="uid://bgrwa322r36hu"]
+[gd_resource type="TileSet" load_steps=5 format=3 uid="uid://bgrwa322r36hu"]
 
+[ext_resource type="Texture2D" uid="uid://b4a5w7ity3nn8" path="res://Sprites/TileMapBorder.png" id="1_emrju"]
 [ext_resource type="Texture2D" uid="uid://bbyorb8lvlvcu" path="res://Sprites/TileMap.png" id="1_x6jmb"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_s15nm"]
+texture = ExtResource("1_emrju")
+texture_region_size = Vector2i(64, 64)
+0:0/0 = 0
+0:0/0/physics_layer_0/linear_velocity = Vector2(0, 0)
+0:0/0/physics_layer_0/angular_velocity = 0.0
+0:0/0/physics_layer_1/linear_velocity = Vector2(0, 0)
+0:0/0/physics_layer_1/angular_velocity = 0.0
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_cj4c3"]
 texture = ExtResource("1_x6jmb")
@@ -67,3 +77,4 @@ tile_size = Vector2i(64, 64)
 physics_layer_0/collision_layer = 1
 physics_layer_1/collision_layer = 2
 sources/1 = SubResource("TileSetAtlasSource_cj4c3")
+sources/0 = SubResource("TileSetAtlasSource_s15nm")
