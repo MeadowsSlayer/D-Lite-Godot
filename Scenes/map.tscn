@@ -3,8 +3,9 @@
 [ext_resource type="Script" path="res://Scripts/map_generation.gd" id="1_r7yso"]
 [ext_resource type="TileSet" uid="uid://bgrwa322r36hu" path="res://TileSet.tres" id="2_at6d5"]
 
-[node name="Node2D" type="Node2D"]
+[node name="Node2D" type="Node2D" node_paths=PackedStringArray("tile_map")]
 script = ExtResource("1_r7yso")
+tile_map = NodePath("TileMap")
 
 [node name="TileMap" type="TileMap" parent="."]
 y_sort_enabled = true

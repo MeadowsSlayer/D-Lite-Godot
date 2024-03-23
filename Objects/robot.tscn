@@ -13,9 +13,11 @@ collision_mask = 3
 script = ExtResource("1_tyflt")
 
 [node name="CollisionPolygon2D" type="CollisionPolygon2D" parent="."]
+visible = false
 polygon = PackedVector2Array(0, -16, -32, 16, 32, 16)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+visible = false
 position = Vector2(0, 16)
 sprite_frames = ExtResource("1_blqys")
 animation = &"up"
@@ -25,30 +27,35 @@ visible = false
 target_position = Vector2(32, 0)
 
 [node name="Down" type="Area2D" parent="."]
+visible = false
 position = Vector2(0, 32)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Down"]
 shape = SubResource("RectangleShape2D_xhdh0")
 
 [node name="Right" type="Area2D" parent="."]
+visible = false
 position = Vector2(32, 0)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Right"]
 shape = SubResource("RectangleShape2D_xhdh0")
 
 [node name="Left" type="Area2D" parent="."]
+visible = false
 position = Vector2(-32, 0)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Left"]
 shape = SubResource("RectangleShape2D_xhdh0")
 
 [node name="Up" type="Area2D" parent="."]
+visible = false
 position = Vector2(0, -32)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Up"]
 shape = SubResource("RectangleShape2D_xhdh0")
 
 [node name="DownDiff" type="Area2D" parent="."]
+visible = false
 position = Vector2(0, 32)
 collision_layer = 2
 collision_mask = 2
@@ -57,6 +64,7 @@ collision_mask = 2
 shape = SubResource("RectangleShape2D_xhdh0")
 
 [node name="RightDiff" type="Area2D" parent="."]
+visible = false
 position = Vector2(32, 0)
 collision_layer = 2
 collision_mask = 2
@@ -65,6 +73,7 @@ collision_mask = 2
 shape = SubResource("RectangleShape2D_xhdh0")
 
 [node name="LeftDiff" type="Area2D" parent="."]
+visible = false
 position = Vector2(-32, 0)
 collision_layer = 2
 collision_mask = 2
@@ -73,6 +82,7 @@ collision_mask = 2
 shape = SubResource("RectangleShape2D_xhdh0")
 
 [node name="UpDiff" type="Area2D" parent="."]
+visible = false
 position = Vector2(0, -32)
 collision_layer = 2
 collision_mask = 2
@@ -80,14 +90,19 @@ collision_mask = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="UpDiff"]
 shape = SubResource("RectangleShape2D_xhdh0")
 
+[node name="Polygon2D4" type="Polygon2D" parent="."]
+position = Vector2(0, -8)
+color = Color(0.132813, 0.929688, 0.046875, 1)
+polygon = PackedVector2Array(16, 0, 16, 16, 8, 24, -8, 24, -16, 16, -16, 0)
+
 [node name="Polygon2D" type="Polygon2D" parent="."]
 position = Vector2(0, -8)
-color = Color(0.289063, 0.886719, 0.984375, 1)
+color = Color(0.113725, 0.564706, 0.807843, 1)
 polygon = PackedVector2Array(-16, 0, -8, 0, -8, 8, -16, 8)
 
 [node name="Polygon2D2" type="Polygon2D" parent="."]
 position = Vector2(24, -8)
-color = Color(0.290196, 0.890196, 0.988235, 1)
+color = Color(0.113725, 0.564706, 0.807843, 1)
 polygon = PackedVector2Array(-16, 0, -8, 0, -8, 8, -16, 8)
 
 [node name="Polygon2D3" type="Polygon2D" parent="."]

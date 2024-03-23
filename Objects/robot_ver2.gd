@@ -42,10 +42,10 @@ var points_avoid = []
 var possible_dir = []
 var graph = {}
 var move_directions = {
-	"right": Vector2(32, 0),
-	"left": Vector2(-32, 0),
-	"up": Vector2(0, -32),
-	"down": Vector2(0, 32)}
+	"right" : Vector2(32, 0),
+	"left"  : Vector2(-32, 0),
+	"up"    : Vector2(0, -32),
+	"down"  : Vector2(0, 32)}
 var value_label = preload("res://Objects/value.tscn")
 
 func _ready():
